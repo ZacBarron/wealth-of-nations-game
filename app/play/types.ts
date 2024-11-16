@@ -44,11 +44,11 @@ export type CardEffect = {
 }
 
 export type CardTag = 
-  | 'military'    // Military-themed buildings
-  | 'economic'    // Economy-focused cards
-  | 'scientific'  // Tech-related cards
-  | 'industrial'  // Production-focused
-  | 'political';  // Government/policy related
+  | 'industrial'
+  | 'economic'
+  | 'scientific'
+  | 'political'
+  | 'military';
 
 export type CardCondition = {
   requiresTag?: CardTag;

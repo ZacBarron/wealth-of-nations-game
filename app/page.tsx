@@ -10,6 +10,7 @@ import { ethers } from 'ethers';
 import { useState, useEffect } from 'react';
 import { createClient } from "@/src/lib/client";
 import Link from 'next/link';
+import Image from 'next/image';
 
 // Define outside the component with contract parameter
 const checkStarterPackOwnership = async (
@@ -125,7 +126,7 @@ const statsCards = [
     icon: ''
   },
   {
-    title: 'Diamonds',
+    title: 'DIAMONDS',
     value: '0 💎',
     change: 'In-game currency',
     color: colors.cards.emerald,
@@ -386,6 +387,65 @@ export default function Home() {
     }
   };
 
+  useEffect(() => {
+    const fetchNFTMetadata = async () => {
+      setIsLoadingMetadata(true);
+      try {
+        if (!contract) {
+          console.log('Contract not initialized');
+          return;
+        }
+
+        // Get tokenURI from contract
+        const tokenUri = await contract.tokenURI(0);
+        console.log('Token URI from contract:', tokenUri);
+
+        if (tokenUri) {
+          const ipfsHash = tokenUri.replace('ipfs://', '');
+          
+          // Try our API route
+          const metadataResponse = await fetch(`/api/ipfs?hash=${ipfsHash}`);
+          
+          if (metadataResponse.ok) {
+            const metadata = await metadataResponse.json();
+            console.log('Successfully fetched metadata:', metadata);
+            setNftMetadata(metadata as NFTMetadata);
+            return;
+          }
+        }
+
+        // Fallback metadata with correct type
+        const fallbackMetadata: NFTMetadata = {
+          name: "Wealth of Nations Pack",
+          description: "A pack of cards to use in Wealth of Nations.",
+          image: '/images/globe-card.png',
+          attributes: [
+            {
+              trait_type: "Pack Type",
+              value: "Unknown"
+            },
+            {
+              trait_type: "Status",
+              value: "Unknown"
+            }
+          ]
+        };
+        
+        setNftMetadata(fallbackMetadata);
+        
+      } catch (err) {
+        console.error('Error fetching NFT metadata:', err);
+        setNftMetadata(null);
+      } finally {
+        setIsLoadingMetadata(false);
+      }
+    };
+
+    if (user?.address) {
+      fetchNFTMetadata();
+    }
+  }, [user?.address, contract]);
+
   return (
     <AuthLayout>
       {user && (
@@ -427,12 +487,14 @@ export default function Home() {
                     Your first set of cards to start your journey in Wealth of Nations.
                   </p>
                   
-                  <div className="max-w-[210px] mx-auto">
-                    <div className="relative w-full pb-[150%] mb-6 rounded-xl overflow-hidden bg-blue-900/30">
-                      <img 
+                  <div className="max-w-[210px] mx-auto mb-6">
+                    <div className="relative rounded-xl overflow-hidden bg-blue-900/30">
+                      <Image 
                         src={ipfsToHttp(nftMetadata?.image || FALLBACK.IMAGE)}
                         alt="Starter Pack"
-                        className="absolute inset-0 w-full h-full object-contain rounded-xl"
+                        width={300}
+                        height={450}
+                        className="object-contain w-full h-auto"
                       />
                     </div>
                   </div>
@@ -466,12 +528,14 @@ export default function Home() {
                     Your first set of cards to start your journey in Wealth of Nations.
                   </p>
 
-                  <div className="max-w-[210px] mx-auto">
-                    <div className="relative w-full pb-[150%] mb-6 rounded-xl overflow-hidden bg-blue-900/30">
-                      <img 
+                  <div className="max-w-[210px] mx-auto mb-6">
+                    <div className="relative rounded-xl overflow-hidden bg-blue-900/30">
+                      <Image 
                         src={ipfsToHttp(nftMetadata?.image || FALLBACK.IMAGE)}
                         alt="Starter Pack"
-                        className="absolute inset-0 w-full h-full object-contain rounded-xl"
+                        width={300}
+                        height={450}
+                        className="object-contain w-full h-auto"
                       />
                     </div>
                   </div>

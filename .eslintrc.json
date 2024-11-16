@@ -1,6 +1,9 @@
 {
   "extends": "next/core-web-vitals",
   "rules": {
-    "max-len": ["error", { "code": 150 }]
+    "max-len": ["error", { "code": 150 }],
+    "react/no-unescaped-entities": "off",
+    "@next/next/no-img-element": "warn",
+    "react-hooks/exhaustive-deps": "warn"
   }
 }
