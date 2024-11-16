@@ -9,8 +9,8 @@ import { Providers } from "./providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Account Kit Quickstart",
-  description: "Account Kit Quickstart NextJS Template",
+  title: "Wealth of Nations: The Trading Card Game",
+  description: "Build your economic empire in this strategic NFT trading card game. Claim your starter pack and begin your journey to dominate global trade.",
 };
 
 export default function RootLayout({

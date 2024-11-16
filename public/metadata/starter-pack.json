@@ -1,0 +1,15 @@
+{
+  "name": "Wealth of Nations Starter Pack",
+  "description": "Your first set of cards to start your journey in Wealth of Nations.",
+  "image": "ipfs://bafybeifzahwqzd5gwco6bqmnuoggk76lbmj57ujfrkv6k6q76jrw2rf4sy",
+  "attributes": [
+    {
+      "trait_type": "Pack Type",
+      "value": "Starter"
+    },
+    {
+      "trait_type": "Status",
+      "value": "Unopened"
+    }
+  ]
+}

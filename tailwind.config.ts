@@ -8,11 +8,21 @@ export default withAccountKitUi({
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {},
-  },
-  colors: {
-    "btn-primary": createColorSet("#E82594", "#FF66CC"),
-    "fg-accent-brand": createColorSet("#E82594", "#FF66CC"),
+    extend: {
+      colors: {
+        gold: {
+          300: '#fcd34d',
+          400: '#fbbf24',
+          500: '#f59e0b',
+          600: '#d97706',
+        },
+      },
+    },
   },
   plugins: [],
+}, {
+  colors: {
+    "btn-primary": createColorSet("#1e3a8a", "#1e40af"),
+    "fg-accent-brand": createColorSet("#1e3a8a", "#1e40af"),
+  },
 });
