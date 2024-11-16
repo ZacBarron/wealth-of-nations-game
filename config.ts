@@ -10,14 +10,10 @@ const uiConfig: AlchemyAccountsUIConfig = {
   illustrationStyle: "outline",
   auth: {
     sections: [
-      [{ 
-        type: "email",
-        hideButton: false,
-        buttonLabel: "Continue with Email"
-      }]
+      [{ type: "email" }],
+      [{ type: "social", authProviderId: "google", mode: "popup" }],
     ],
     addPasskeyOnSignup: false,
-    hideSignInText: false
   },
 };
 
@@ -29,7 +25,7 @@ export const config = createConfig(
     chain: arbitrumSepolia,
     ssr: true,
     storage: cookieStorage,
-    enablePopupOauth: false,
+    enablePopupOauth: true, // This must be true
   },
   uiConfig
 );
