@@ -141,6 +141,9 @@ const statsCards = [
   }
 ];
 
+// Create a custom event for pack claiming
+const PACK_CLAIMED_EVENT = 'packClaimed';
+
 export default function Home() {
   // Auth states
   const user = useUser();
@@ -165,6 +168,7 @@ export default function Home() {
   const [isPackOpened, setIsPackOpened] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const metadataFetchedRef = useRef(false);
+  const [isPackClaimed, setIsPackClaimed] = useState(false);
 
   // Initialize contract
   useEffect(() => {
@@ -369,6 +373,48 @@ export default function Home() {
       fetchNFTMetadata();
     }
   }, [user?.address, contract, fetchNFTMetadata]);
+
+  // Add function to check pack status
+  const checkPackStatus = async () => {
+    if (!user?.address) return;
+    
+    try {
+      // Replace with your actual contract call
+      const response = await fetch(`/api/pack-status?address=${user.address}`);
+      const data = await response.json();
+      setIsPackClaimed(data.claimed);
+      setIsPackOpened(data.opened);
+    } catch (error) {
+      console.error('Error checking pack status:', error);
+    }
+  };
+
+  // Add event listener for transaction success
+  const handlePackClaimed = () => {
+    setIsPackClaimed(true);
+    checkPackStatus(); // Recheck status after claim
+  };
+
+  // Check status on mount and when user changes
+  useEffect(() => {
+    checkPackStatus();
+  }, [user?.address]);
+
+  useEffect(() => {
+    // Function to handle the custom event
+    const handlePackClaimed = () => {
+      setIsPackClaimed(true);
+      // Update your activity list here
+    };
+
+    // Add event listener
+    window.addEventListener(PACK_CLAIMED_EVENT, handlePackClaimed);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener(PACK_CLAIMED_EVENT, handlePackClaimed);
+    };
+  }, []);
 
   return (
     <AuthLayout>

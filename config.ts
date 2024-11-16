@@ -11,7 +11,6 @@ const uiConfig: AlchemyAccountsUIConfig = {
   auth: {
     sections: [
       [{ type: "email" }],
-      [{ type: "social", authProviderId: "google", mode: "popup" }],
     ],
     addPasskeyOnSignup: false,
   },
@@ -25,7 +24,7 @@ export const config = createConfig(
     chain: arbitrumSepolia,
     ssr: true,
     storage: cookieStorage,
-    enablePopupOauth: true, // This must be true
+    enablePopupOauth: false, 
   },
   uiConfig
 );
