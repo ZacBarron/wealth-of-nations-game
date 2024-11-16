@@ -21,7 +21,11 @@ export default function AuthLayout({
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-950 to-blue-900">
+      <div className={`
+        min-h-screen 
+        bg-gradient-to-b from-blue-900 to-blue-950
+        flex flex-col
+      `}>
         {/* Hero Section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="pt-20 pb-16 text-center lg:pt-32">

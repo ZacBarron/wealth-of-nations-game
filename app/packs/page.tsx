@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ShoppingCartIcon, GiftIcon } from "@heroicons/react/24/outline";
 import { useUser } from "@account-kit/react";
 import { ethers } from 'ethers';
+import Image from 'next/image';
 
 // Import the same constants and helper functions
 const CONTRACT_ABI = [
@@ -141,10 +142,11 @@ export default function PacksPage() {
                 
                 <div className="max-w-[210px] mx-auto">
                   <div className="relative w-full pb-[150%] mb-4 rounded-xl overflow-hidden bg-blue-900/30">
-                    <img 
+                    <Image 
                       src={ipfsToHttp(nftMetadata?.image || FALLBACK.IMAGE)}
                       alt="Starter Pack"
-                      className="absolute inset-0 w-full h-full object-contain rounded-xl"
+                      width={210}
+                      height={315}
                     />
                   </div>
                 </div>

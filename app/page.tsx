@@ -7,7 +7,7 @@ import {
   useUser,
 } from "@account-kit/react";
 import { ethers } from 'ethers';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { createClient } from "@/src/lib/client";
 import Link from 'next/link';
 import Image from 'next/image';
@@ -161,9 +161,10 @@ export default function Home() {
   const [statusMessage, setStatusMessage] = useState('');
   const [txHash, setTxHash] = useState('');
   const [actualTxHash, setActualTxHash] = useState('');
-  const [isLoadingMetadata, setIsLoadingMetadata] = useState(true);
+  const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
   const [isPackOpened, setIsPackOpened] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const metadataFetchedRef = useRef(false);
 
   // Initialize contract
   useEffect(() => {
@@ -333,118 +334,41 @@ export default function Home() {
     }
   };
 
-  // Fetch metadata from contract and IPFS
-  const fetchNFTMetadata = async () => {
+  // First, memoize the fetch function to prevent it from changing on every render
+  const fetchNFTMetadata = useCallback(async () => {
+    if (!contract || metadataFetchedRef.current) {
+      return;
+    }
+
     setIsLoadingMetadata(true);
     try {
-      if (!contract) {
-        console.log('Contract not initialized');
-        return;
-      }
-
-      // Get tokenURI from contract
       const tokenUri = await contract.tokenURI(0);
       console.log('Token URI from contract:', tokenUri);
 
       if (tokenUri) {
         const ipfsHash = tokenUri.replace('ipfs://', '');
-        
-        // Try our API route
         const metadataResponse = await fetch(`/api/ipfs?hash=${ipfsHash}`);
         
         if (metadataResponse.ok) {
           const metadata = await metadataResponse.json();
-          console.log('Successfully fetched metadata:', metadata);
           setNftMetadata(metadata as NFTMetadata);
-          return;
+          metadataFetchedRef.current = true;
         }
       }
-
-      // Fallback metadata with correct type
-      const fallbackMetadata: NFTMetadata = {
-        name: "Wealth of Nations Pack",
-        description: "A pack of cards to use in Wealth of Nations.",
-        image: '/images/globe-card.png',
-        attributes: [
-          {
-            trait_type: "Pack Type",
-            value: "Unknown"
-          },
-          {
-            trait_type: "Status",
-            value: "Unknown"
-          }
-        ]
-      };
-      
-      setNftMetadata(fallbackMetadata);
-      
     } catch (err) {
       console.error('Error fetching NFT metadata:', err);
       setNftMetadata(null);
     } finally {
       setIsLoadingMetadata(false);
     }
-  };
+  }, [contract]); // Only depend on contract
 
+  // Then use a single useEffect for fetching
   useEffect(() => {
-    const fetchNFTMetadata = async () => {
-      setIsLoadingMetadata(true);
-      try {
-        if (!contract) {
-          console.log('Contract not initialized');
-          return;
-        }
-
-        // Get tokenURI from contract
-        const tokenUri = await contract.tokenURI(0);
-        console.log('Token URI from contract:', tokenUri);
-
-        if (tokenUri) {
-          const ipfsHash = tokenUri.replace('ipfs://', '');
-          
-          // Try our API route
-          const metadataResponse = await fetch(`/api/ipfs?hash=${ipfsHash}`);
-          
-          if (metadataResponse.ok) {
-            const metadata = await metadataResponse.json();
-            console.log('Successfully fetched metadata:', metadata);
-            setNftMetadata(metadata as NFTMetadata);
-            return;
-          }
-        }
-
-        // Fallback metadata with correct type
-        const fallbackMetadata: NFTMetadata = {
-          name: "Wealth of Nations Pack",
-          description: "A pack of cards to use in Wealth of Nations.",
-          image: '/images/globe-card.png',
-          attributes: [
-            {
-              trait_type: "Pack Type",
-              value: "Unknown"
-            },
-            {
-              trait_type: "Status",
-              value: "Unknown"
-            }
-          ]
-        };
-        
-        setNftMetadata(fallbackMetadata);
-        
-      } catch (err) {
-        console.error('Error fetching NFT metadata:', err);
-        setNftMetadata(null);
-      } finally {
-        setIsLoadingMetadata(false);
-      }
-    };
-
-    if (user?.address) {
+    if (user?.address && contract && !metadataFetchedRef.current) {
       fetchNFTMetadata();
     }
-  }, [user?.address, contract]);
+  }, [user?.address, contract, fetchNFTMetadata]);
 
   return (
     <AuthLayout>
