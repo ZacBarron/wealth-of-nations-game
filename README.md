@@ -63,31 +63,42 @@ Wealth of Nations leverages the power of blockchain to:
 - ✅ **Manage frontend** to only allow one starter pack per user account
 - ✅ **Minting-related success/failure messages** and error handling
 - ✅ **Placeholder NFT metadata/image** for when it can't be retrieved from IPFS
-- ✅ **Fix NFT metadata retrieval** and ensure proper rendering using Alchemy's NFT API (resolving issues with incorrect tokenURI formatting).
-- ✅ **Create dashboard** update the logged in experience to show a dashboard with starter pack, activity, stats, and navigation links.
+- ✅ **Fix NFT metadata retrieval** using Alchemy's NFT API
+- ✅ **Create dashboard** with starter pack, activity, stats, and navigation links
+- ✅ **Build "My Packs" section** with pack display and opening functionality
+- ✅ **Add activity tracking** for account creation, pack claiming, and pack opening
+- ✅ **Implement stats cards** showing total cards, packs claimed, diamonds, and rank
+- ✅ **Create store interface** for future pack purchases
 
 ### Immediate Priorities
-📝 **Flesh out placeholder navigation links and sections**:
-  - Build out rest of logged in experience.
-📝 **Loading states for collection items**:
-  - Display loading state while retrieving NFT metadata and image.
-- 📝 **Build a "My Items" section**:
-  - Display owned packs with metadata (name, image, description).
-  - Add a placeholder "Open Pack" button for future functionality.
-- 📝 **Create responsive styling** for the "My Items" section using Tailwind CSS.
+- 📝 **Implement pack opening animation**:
+  - Create engaging reveal animation when opening packs
+  - Show individual cards as they're revealed
+- 📝 **Build card collection view**:
+  - Display all owned cards after pack opening
+  - Add filtering and sorting options
+- 📝 **Add deck building functionality**:
+  - Allow players to create and edit decks
+  - Implement deck validation rules
 
 ### Mid-Term Goals
-- 📝 **Implement the "Open Pack" mechanic**:
-  - Burn the pack NFT.
-  - Mint and reveal 5 individual cards (NFTs).
-  - Display revealed cards in the "My Items" section.
+- 📝 **Create matchmaking system**:
+  - Allow players to find and challenge opponents
+  - Implement game lobby system
+- 📝 **Build game board interface**:
+  - Design and implement the play area
+  - Add card placement and interaction mechanics
 
 ### Long-Term Goals
-- 📝 **Design and implement the card trading system**:
-  - Enable players to trade NFTs with each other.
-  - Create a simple marketplace UI for listing, buying, and selling cards.
-- 📝 **Develop game mechanics** for resource management and leader deployment.
-- 📝 **Add support for dynamic event cards** that simulate global economic events.
+- 📝 **Implement trading system**:
+  - Enable peer-to-peer card trading
+  - Create marketplace for buying/selling cards
+- 📝 **Add tournament support**:
+  - Create tournament brackets
+  - Implement prize distribution
+- 📝 **Expand card collection**:
+  - Design and release new card sets
+  - Add special edition cards
 
 ---
 
@@ -110,9 +121,12 @@ npm install
 3. Create a `.env.local` file with the following variables:
 ```env
 NEXT_PUBLIC_ALCHEMY_API_KEY=your_alchemy_key
-NEXT_PUBLIC_STARTER_PACK_ADDRESS=0x6B5A3Ed3aDF90Bc5aD32365F1b8683DDed2B4337
-NEXT_PUBLIC_GAS_POLICY_ID=84679efc-d4b4-4e93-b93d-5cb99ff6adc3
+NEXT_PUBLIC_STARTER_PACK_ADDRESS=your_contract_address
+NEXT_PUBLIC_CONTRACT_ADDRESS=your_contract_address
+NEXT_PUBLIC_GAS_POLICY_ID=your_gas_policy_id
 NEXT_PUBLIC_RPC_URL=https://arb-sepolia.g.alchemy.com/v2/your_alchemy_key
+NEXT_PUBLIC_ACCOUNT_KIT_APP_ID=your_account_kit_app_id
+NEXT_PUBLIC_ACCOUNT_KIT_NETWORK=arbitrum-sepolia
 
 ```
 
@@ -126,9 +140,8 @@ npm run dev
 The main contract (`StarterPack.sol`) handles:
 - NFT minting (ERC721)
 - Ownership verification
-- Base URI management
+- Token URI management
 - Supply limits (10,000 max supply)
-- Pause functionality for emergency stops
 
 ## Contributing
 

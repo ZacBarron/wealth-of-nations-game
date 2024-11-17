@@ -1,7 +1,7 @@
 async function main() {
   const starterPack = await ethers.getContractAt(
     "StarterPack",
-    "0x95A131ebcD1B01ff42ecaDA626ABC50e05dDb7af"
+    "0x8BdD9B03fCf2271F810BDfa0E5A05aFBD21C55AF"
   );
 
   console.log("Setting new baseURI...");

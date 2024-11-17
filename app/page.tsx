@@ -11,6 +11,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { createClient } from "@/src/lib/client";
 import Link from 'next/link';
 import Image from 'next/image';
+import { useDiamondStore } from './lib/store';
 
 // Define outside the component with contract parameter
 const checkStarterPackOwnership = async (
@@ -109,40 +110,73 @@ const colors = {
   border: 'border-blue-400/20'
 } as const;
 
-// Update the stats cards
-const statsCards = [
-  {
-    title: 'TOTAL CARDS',
-    value: '40',
-    change: 'Add cards to your deck',
-    color: colors.cards.red,
-    icon: ''
-  },
-  {
-    title: 'PACKS OPENED',
-    value: '1',
-    change: 'Buy packs to open new cards',
-    color: colors.cards.purple,
-    icon: ''
-  },
-  {
-    title: 'DIAMONDS',
-    value: '0 💎',
-    change: 'In-game currency',
-    color: colors.cards.emerald,
-    icon: ''
-  },
-  {
-    title: 'RANK',
-    value: 'Unranked',
-    change: 'Play games to rank up',
-    color: colors.cards.orange,
-    icon: ''
-  }
-];
+// Make StatsCards a proper React component
+const StatsCards: React.FC<{ hasNFT: boolean; isPackOpened: boolean }> = ({ hasNFT, isPackOpened }) => {
+  const diamonds = useDiamondStore();
+  
+  const cards = [
+    {
+      title: 'TOTAL CARDS',
+      value: isPackOpened ? '40' : '0',
+      change: isPackOpened ? 'Cards in your collection' : 'Open your starter pack',
+      color: colors.cards.red,
+      icon: ''
+    },
+    {
+      title: 'PACKS CLAIMED',
+      value: hasNFT ? '1' : '0',
+      change: hasNFT 
+        ? 'Starter pack claimed' 
+        : 'Claim your first pack',
+      color: colors.cards.purple,
+      icon: ''
+    },
+    {
+      title: 'DIAMONDS',
+      value: `${diamonds.balance} 💎`,
+      change: 'In-game currency',
+      color: colors.cards.emerald,
+      icon: ''
+    },
+    {
+      title: 'RANK',
+      value: 'Unranked',
+      change: 'Play games to rank up',
+      color: colors.cards.orange,
+      icon: ''
+    }
+  ];
+
+  return (
+    <>
+      {cards.map((card, index) => (
+        <div key={index} className={`${card.color} rounded-2xl p-6 text-white`}>
+          <div className="flex justify-between">
+            <div>
+              <div className="text-sm">{card.title}</div>
+              <div className="text-3xl font-bold mt-2">{card.value}</div>
+              <div className="text-sm mt-2">{card.change}</div>
+            </div>
+            <span className="text-2xl">{card.icon}</span>
+          </div>
+        </div>
+      ))}
+    </>
+  );
+};
 
 // Create a custom event for pack claiming
 const PACK_CLAIMED_EVENT = 'packClaimed';
+
+// Add a new type for activities
+type ActivityType = 'ACCOUNT_CREATED' | 'PACK_CLAIMED' | 'PACK_OPENED';
+
+type Activity = {
+  type: ActivityType;
+  title: string;
+  description: string;
+  timestamp: Date;
+};
 
 export default function Home() {
   // Auth states
@@ -169,6 +203,9 @@ export default function Home() {
   const [isProcessing, setIsProcessing] = useState(false);
   const metadataFetchedRef = useRef(false);
   const [isPackClaimed, setIsPackClaimed] = useState(false);
+
+  // Add state for activities
+  const [activities, setActivities] = useState<Activity[]>([]);
 
   // Initialize contract
   useEffect(() => {
@@ -416,24 +453,49 @@ export default function Home() {
     };
   }, []);
 
+  // Add useEffect to initialize activities
+  useEffect(() => {
+    if (user) {
+      const initialActivities: Activity[] = [
+        {
+          type: 'ACCOUNT_CREATED' as const,
+          title: 'Account Created',
+          description: `${user.email || 'Email Unavailable'} | ${user.address || 'Address Unavailable'}`,
+          timestamp: new Date()
+        }
+      ];
+
+      if (hasNFT) {
+        initialActivities.unshift({
+          type: 'PACK_CLAIMED' as const,
+          title: 'Pack Claimed',
+          description: 'Wealth of Nations Starter Pack',
+          timestamp: new Date()
+        });
+      }
+
+      setActivities(initialActivities);
+    }
+  }, [user, hasNFT]);
+
+  // Update the pack opening handler
+  const handlePackOpen = () => {
+    setIsPackOpened(true);
+    setActivities(prev => [{
+      type: 'PACK_OPENED' as const,
+      title: 'Pack Opened',
+      description: '40 cards added to your collection',
+      timestamp: new Date()
+    }, ...prev]);
+  };
+
   return (
     <AuthLayout>
       {user && (
         <div className="space-y-8">
           {/* Stats Cards Grid */}
           <div className="grid grid-cols-4 gap-6">
-            {statsCards.map((card, index) => (
-              <div key={index} className={`${card.color} rounded-2xl p-6 text-white`}>
-                <div className="flex justify-between">
-                  <div>
-                    <div className="text-sm">{card.title}</div>
-                    <div className="text-3xl font-bold mt-2">{card.value}</div>
-                    <div className="text-sm mt-2">{card.change}</div>
-                  </div>
-                  <span className="text-2xl">{card.icon}</span>
-                </div>
-              </div>
-            ))}
+            <StatsCards hasNFT={hasNFT} isPackOpened={isPackOpened} />
           </div>
 
           {/* Main Card Grid */}
@@ -510,15 +572,27 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center">
-                    <span className="text-blue-300">40 cards</span>
-                    <button
-                      onClick={() => setIsPackOpened(true)}
-                      className="px-6 py-3 bg-amber-600 hover:bg-amber-700 rounded-lg transition-colors text-white font-semibold"
-                    >
-                      Open Pack
-                    </button>
+                  {/* Pack Contents Info */}
+                  <div className="bg-blue-800/30 rounded-lg p-4 mb-6">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-blue-200 font-medium">Pack Contents:</span>
+                      <span className="text-blue-300">40 cards</span>
+                    </div>
+                    <p className="text-blue-200 text-sm">
+                      Contains a balanced mix of resources, industries, and trade cards to build your first deck.
+                    </p>
                   </div>
+
+                  <button
+                    onClick={handlePackOpen}
+                    className={`
+                      w-full px-8 py-4 rounded-xl font-bold transition-all duration-300
+                      bg-amber-500 hover:bg-amber-400 shadow-lg hover:shadow-amber-500/20
+                      text-white
+                    `}
+                  >
+                    Open Pack
+                  </button>
                 </>
               ) : (
                 // Opened state - Show next steps
@@ -561,27 +635,15 @@ export default function Home() {
             <div className="bg-blue-900 p-6 rounded-2xl">
               <h2 className="text-xl font-bold text-gold-300 mb-4">Recent Activity</h2>
               <div className="space-y-4">
-                {/* Show Pack Claim if user has claimed */}
-                {hasNFT && (
-                  <div className="flex items-start gap-3">
-                    <div className="w-2 h-2 mt-2 rounded-full bg-gold-300"></div>
-                    <div>
-                      <div className="text-white font-medium">Pack Claimed</div>
-                      <div className="text-sm text-blue-200">Wealth of Nations Starter Pack</div>
+                {activities.map((activity, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <div className="w-2 h-2 mt-2 rounded-full bg-gold-300 flex-shrink-0"></div>
+                    <div className="min-w-0">
+                      <div className="text-white font-medium">{activity.title}</div>
+                      <div className="text-sm text-blue-200 break-all">{activity.description}</div>
                     </div>
                   </div>
-                )}
-                
-                {/* Always show account creation */}
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 mt-2 rounded-full bg-gold-300"></div>
-                  <div>
-                    <div className="text-white font-medium">Account Created</div>
-                    <div className="text-sm text-blue-200 font-mono break-all">
-                      {user?.email || 'Email Unavailable'} | {user?.address || 'Address Unavailable'}
-                    </div>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>

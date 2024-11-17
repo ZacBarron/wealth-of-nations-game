@@ -5,22 +5,27 @@ interface DiamondState {
   balance: number;
   addDiamonds: (amount: number) => void;
   spendDiamonds: (amount: number) => boolean;
+  resetDiamonds: () => void;
 }
 
 export const useDiamondStore = create<DiamondState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       balance: 0,
       addDiamonds: (amount) => 
         set((state) => ({ balance: state.balance + amount })),
       spendDiamonds: (amount) => {
-        const currentBalance = get().balance;
-        if (currentBalance >= amount) {
-          set({ balance: currentBalance - amount });
-          return true;
-        }
-        return false;
+        let success = false;
+        set((state) => {
+          if (state.balance >= amount) {
+            success = true;
+            return { balance: state.balance - amount };
+          }
+          return state;
+        });
+        return success;
       },
+      resetDiamonds: () => set({ balance: 0 })
     }),
     {
       name: 'diamond-storage',

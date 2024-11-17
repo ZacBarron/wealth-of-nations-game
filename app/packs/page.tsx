@@ -5,6 +5,7 @@ import { ShoppingCartIcon, GiftIcon } from "@heroicons/react/24/outline";
 import { useUser } from "@account-kit/react";
 import { ethers } from 'ethers';
 import Image from 'next/image';
+import { useDiamondStore } from '../lib/store';
 
 // Import the same constants and helper functions
 const CONTRACT_ABI = [
@@ -48,6 +49,7 @@ export default function PacksPage() {
   const [hasStarterPack, setHasStarterPack] = useState(false);
   const [nftMetadata, setNftMetadata] = useState<typeof FALLBACK.METADATA | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const diamonds = useDiamondStore();
 
   // Initialize contract
   useEffect(() => {
@@ -131,7 +133,7 @@ export default function PacksPage() {
           ) : hasStarterPack ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="bg-blue-800/50 rounded-xl p-6 border border-blue-700">
-                <div className="flex justify-between items-start mb-4">
+                <div className="flex justify-between items-start mb-6">
                   <h3 className="text-xl font-bold text-amber-400">
                     {nftMetadata?.name || "Starter Pack"}
                   </h3>
@@ -140,20 +142,29 @@ export default function PacksPage() {
                   </span>
                 </div>
                 
-                <div className="max-w-[210px] mx-auto">
-                  <div className="relative w-full pb-[150%] mb-4 rounded-xl overflow-hidden bg-blue-900/30">
+                <div className="max-w-[210px] mx-auto mb-6">
+                  <div className="relative rounded-xl overflow-hidden bg-blue-900/30">
                     <Image 
                       src={ipfsToHttp(nftMetadata?.image || FALLBACK.IMAGE)}
                       alt="Starter Pack"
                       width={210}
                       height={315}
+                      className="w-full h-auto"
+                      style={{ aspectRatio: '2/3' }}
                     />
                   </div>
                 </div>
-                
-                <p className="text-blue-200 mb-4">
-                  Your first set of cards to start your journey in Wealth of Nations.
-                </p>
+
+                {/* Pack Contents Info */}
+                <div className="bg-blue-800/30 rounded-lg p-4 mb-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-blue-200 font-medium">Pack Contents:</span>
+                    <span className="text-blue-300">40 cards</span>
+                  </div>
+                  <p className="text-blue-200 text-sm">
+                    Contains a balanced mix of resources, industries, and trade cards to build your first deck.
+                  </p>
+                </div>
                 
                 <div className="flex justify-between items-center">
                   <span className="text-blue-300 text-sm">40 cards</span>
@@ -178,7 +189,7 @@ export default function PacksPage() {
               Store
             </h2>
             <span className="text-blue-200">
-              💎 0 diamonds
+              💎 {diamonds.balance} diamonds
             </span>
           </div>
 

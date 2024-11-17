@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
+import { useDiamondStore } from '../lib/store';
 
 type PurchaseOption = {
   amount: number;
@@ -23,22 +24,19 @@ interface DiamondsModalProps {
 
 export default function DiamondsModal({ isOpen, onClose, onPurchase }: DiamondsModalProps) {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
-  const [customAmount, setCustomAmount] = useState<string>('');
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'crypto'>('card');
   const [isProcessing, setIsProcessing] = useState(false);
+  const { resetDiamonds } = useDiamondStore();
 
   const handlePurchase = async () => {
-    if (!selectedAmount && !customAmount) return;
+    if (!selectedAmount) return;
     
     setIsProcessing(true);
     try {
-      const amount = selectedAmount || parseInt(customAmount);
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1500));
-      onPurchase(amount);
+      onPurchase(selectedAmount);
       onClose();
       setSelectedAmount(null);
-      setCustomAmount('');
     } finally {
       setIsProcessing(false);
     }
@@ -46,10 +44,8 @@ export default function DiamondsModal({ isOpen, onClose, onPurchase }: DiamondsM
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
-      {/* Backdrop */}
       <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
 
-      {/* Full-screen container */}
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <Dialog.Panel className="bg-blue-900 rounded-2xl p-6 max-w-md w-full shadow-xl">
           <div className="flex justify-between items-center mb-6">
@@ -71,7 +67,6 @@ export default function DiamondsModal({ isOpen, onClose, onPurchase }: DiamondsM
                 key={option.amount}
                 onClick={() => {
                   setSelectedAmount(option.amount);
-                  setCustomAmount('');
                 }}
                 className={`
                   p-4 rounded-xl border-2 transition-all
@@ -88,22 +83,6 @@ export default function DiamondsModal({ isOpen, onClose, onPurchase }: DiamondsM
                 )}
               </button>
             ))}
-          </div>
-
-          {/* Custom amount */}
-          <div className="mb-6">
-            <label className="block text-blue-200 mb-2">Custom Amount</label>
-            <input
-              type="number"
-              min="1"
-              value={customAmount}
-              onChange={(e) => {
-                setCustomAmount(e.target.value);
-                setSelectedAmount(null);
-              }}
-              className="w-full bg-blue-800/50 border border-blue-700 rounded-lg px-4 py-2 text-white"
-              placeholder="Enter amount..."
-            />
           </div>
 
           {/* Payment method */}
@@ -147,16 +126,30 @@ export default function DiamondsModal({ isOpen, onClose, onPurchase }: DiamondsM
             </button>
             <button
               onClick={handlePurchase}
-              disabled={isProcessing || (!selectedAmount && !customAmount)}
+              disabled={isProcessing || !selectedAmount}
               className={`
                 flex-1 px-4 py-2 rounded-lg font-bold transition-all text-white
-                ${isProcessing || (!selectedAmount && !customAmount)
+                ${isProcessing || !selectedAmount
                   ? 'bg-amber-500/50 cursor-not-allowed'
                   : 'bg-amber-500 hover:bg-amber-400'
                 }
               `}
             >
               {isProcessing ? 'Processing...' : 'Confirm Purchase'}
+            </button>
+          </div>
+
+          {/* Testing Tools Section */}
+          <div className="mt-8 pt-4 border-t border-blue-800">
+            <div className="text-xs text-blue-400/50 mb-2">Developer Tools</div>
+            <button
+              onClick={() => {
+                resetDiamonds();
+                onClose();
+              }}
+              className="w-full px-3 py-1.5 rounded text-xs bg-red-500/10 hover:bg-red-500/20 text-red-300/50 hover:text-red-300/80 transition-colors"
+            >
+              Reset Diamonds (Testing Only)
             </button>
           </div>
         </Dialog.Panel>
