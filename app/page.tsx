@@ -566,7 +566,7 @@ export default function Home() {
                   <div className="flex items-start gap-3">
                     <div className="w-2 h-2 mt-2 rounded-full bg-gold-300"></div>
                     <div>
-                      <div className="text-white font-medium">Pack Opened</div>
+                      <div className="text-white font-medium">Pack Claimed</div>
                       <div className="text-sm text-blue-200">Wealth of Nations Starter Pack</div>
                     </div>
                   </div>

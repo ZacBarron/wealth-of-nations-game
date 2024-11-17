@@ -1,41 +1,66 @@
 "use client";
 import { ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 import { useLogout } from "@account-kit/react";
+import { useDiamondStore } from '../../lib/store';
+import DiamondsModal from '../DiamondsModal';
+import toast from 'react-hot-toast';
+import { useState } from 'react';
 
 export default function Header({ title = "Dashboard" }) {
   const { logout } = useLogout();
+  const [isDiamondsModalOpen, setIsDiamondsModalOpen] = useState(false);
+  const { balance, addDiamonds } = useDiamondStore();
+
+  const handlePurchaseDiamonds = (amount: number) => {
+    addDiamonds(amount);
+    toast.success(`Successfully purchased ${amount} diamonds! 💎`);
+    
+    // Dispatch event for activity log
+    window.dispatchEvent(new CustomEvent('diamondsPurchased', {
+      detail: {
+        amount,
+        timestamp: new Date().toISOString()
+      }
+    }));
+  };
 
   return (
     <div className="bg-blue-900 border-b border-blue-800">
       <div className="py-4 px-8 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-white">{title}</h1>
-        <div className="flex items-center">
-          {/* Currency Display */}
-          <div className="flex items-center mr-8 bg-blue-800/40 px-4 py-2 rounded-lg">
-            <div className="flex items-center space-x-2 text-blue-100">
-              <span className="text-2xl">💎</span>
-              <span className="font-medium">0</span>
+        <div className="flex items-center gap-8">
+          {/* Diamonds balance and purchase button */}
+          <div className="flex items-center h-11 rounded-lg overflow-hidden">
+            {/* Balance display */}
+            <div className="flex items-center gap-1 px-3 h-full bg-blue-800/50">
+              <span className="text-white font-medium">{balance}</span>
+              <span className="text-lg">💎</span>
             </div>
-            <a 
-              href="#" 
-              className="ml-2 px-2 py-1 bg-blue-700 hover:bg-blue-600 
-                         rounded text-sm text-blue-100 transition-colors"
+            
+            {/* Purchase button - now using amber CTA styling */}
+            <button
+              onClick={() => setIsDiamondsModalOpen(true)}
+              className="h-full px-3 bg-amber-500 hover:bg-amber-400 transition-colors"
             >
-              +
-            </a>
+              <span className="text-white text-lg font-bold">+</span>
+            </button>
           </div>
 
-          {/* Logout Button */}
-          <button 
+          {/* Logout button */}
+          <button
             onClick={() => logout()}
-            className="px-4 py-2 bg-blue-800 hover:bg-blue-700 text-blue-100 
-                       rounded-lg flex items-center space-x-2 transition-colors"
+            className="flex items-center gap-2 px-4 h-11 rounded-lg bg-blue-800/50 hover:bg-blue-800 text-white transition-colors"
           >
-            <ArrowRightOnRectangleIcon className="w-5 h-5" />
-            <span>Log out</span>
+            <ArrowRightOnRectangleIcon className="h-5 w-5" />
+            Log out
           </button>
         </div>
       </div>
+      <DiamondsModal
+        isOpen={isDiamondsModalOpen}
+        onClose={() => setIsDiamondsModalOpen(false)}
+        onPurchase={handlePurchaseDiamonds}
+      />
     </div>
   );
 }
