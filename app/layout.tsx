@@ -9,8 +9,13 @@ import { Providers } from "./providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Wealth of Nations: The Trading Card Game",
-  description: "Build your economic empire in this strategic NFT trading card game. Claim your starter pack and begin your journey to dominate global trade.",
+  title: "Wealth of Nations",
+  description: "Trade card game on the blockchain",
+  openGraph: {
+    title: "Wealth of Nations",
+    description: "Trade card game on the blockchain",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({
